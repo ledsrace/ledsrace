@@ -1,0 +1,49 @@
+[package]
+name = "ledsrace"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["board20x20"]
+board20x20 = []
+
+[dependencies]
+esp-hal = { version = "1.0.0-beta.0" , features = [
+   "esp32c3", "unstable"
+ ]}
+embedded-hal-async = "1.0.0"
+embassy-executor = { version = "0.7.0", features = ["executor-thread"] }
+embedded-hal = "1.0.0"
+embedded-hal-bus = "0.3.0"
+esp-hal-embassy = { version = "0.7.0", features = ["esp32c3"] }
+embassy-embedded-hal = "0.3.0"
+embassy-time = { version = "0.4.0", features = ["generic-queue-8"] }
+embassy-sync = "0.6.2"
+embassy-futures = "0.1.1"
+static_cell = { version = "2.1.0", features  = ["nightly"] }
+esp-println = { version = "0.13.1", features = ["esp32c3"] }
+# bincode = { version = "2.0.0-rc.3", default-features = false, features = ["derive"] } # "1.3"
+esp-backtrace       = { version = "0.15.1", features = ["esp32c3", "exception-handler", "panic-handler", "println"] }
+panic-halt = "1.0.0"
+riscv-rt = "0.14.0"
+riscv = "0.13.0"
+heapless08 = { package = "heapless", version = "0.8.0" }
+heapless07 = { package = "heapless", version = "0.7.0" }
+critical-section    = "1.1.3"
+ledsrace-logic = {path = "../ledsrace-logic"}
+nb = "1.1"
+
+[profile.dev]
+# Rust debug is too slow.
+# For debug builds always builds with some optimization
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1 # LLVM can perform better optimizations using a single thread
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false
+
