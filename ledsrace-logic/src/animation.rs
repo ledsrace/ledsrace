@@ -1,67 +1,21 @@
-use core::cell::{Cell, RefCell};
-
-use embassy_sync::blocking_mutex::raw::NoopRawMutex;
-use embassy_sync::blocking_mutex::Mutex;
+use advanced::SunsetGlow;
+use basic::StaticColor;
 use embassy_time::{Duration, Instant};
 use heapless::Vec as HeaplessVec;
 use libm::sinf;
 
+use crate::{Circuit, Color, Priority};
+
 pub mod advanced;
 pub mod basic;
-pub mod valentine;
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Color(pub u8, pub u8, pub u8);
-
-#[derive(Clone, Copy, Debug, PartialEq, Ord, PartialOrd, Eq)]
-pub enum Priority {
-    Background = 0,
-    Normal = 1,
-    Warning = 2,
-    Critical = 3,
-}
-
-/// Represents a buffer of LED states that animations can write to
-pub struct LedStateBuffer<const N: usize> {
-    states: [(Color, Priority); N],
-}
-
-impl<const N: usize> LedStateBuffer<N> {
-    pub fn new() -> Self {
-        Self {
-            states: [(Color(0, 0, 0), Priority::Background); N],
-        }
-    }
-
-    /// Set LED state if priority is higher than existing
-    pub fn set_led(&mut self, index: usize, color: Color, priority: Priority) {
-        if index >= N {
-            return;
-        }
-
-        // Only update if new priority is higher
-        if priority >= self.states[index].1 {
-            self.states[index] = (color, priority);
-        }
-    }
-
-    /// Clear the buffer to default state
-    pub fn clear(&mut self) {
-        self.states = [(Color(0, 0, 0), Priority::Background); N];
-    }
-
-    /// Get final LED colors for rendering
-    pub fn get_colors(&self) -> &[(Color, Priority)] {
-        &self.states
-    }
-}
 
 /// Core trait for all animations
-pub trait Animation<const N: usize> {
+pub trait Animation {
     /// Render the current animation frame into the provided buffer
+    /// circuit: Circuit to render on
     /// timestamp: Current animation time
     /// buffer: Buffer to write LED states into
-    fn render(&self, timestamp: Duration, buffer: &mut LedStateBuffer<N>);
+    fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, timestamp: Duration);
 
     /// Returns true if the animation has finished
     fn is_finished(&self) -> bool;
@@ -72,61 +26,59 @@ pub trait Animation<const N: usize> {
     fn reset(&self) {}
 }
 
-/// Manages multiple animations and renders them efficiently
-pub struct AnimationManager<const N: usize> {
-    animations: HeaplessVec<&'static dyn Animation<N>, 8>, // Fixed max number of animations
-    buffer: LedStateBuffer<N>,
-    start_time: Instant,
-}
+// /// Manages multiple animations and renders them efficiently
+// pub struct AnimationManager<const N: usize> {
+//     animations: HeaplessVec<&'static dyn Animation, 8>, // Fixed max number of animations
+//     buffer: LedStateBuffer<N>,
+//     start_time: Instant,
+// }
 
-impl<const N: usize> AnimationManager<N> {
-    pub fn new() -> Self {
-        Self {
-            animations: HeaplessVec::new(),
-            buffer: LedStateBuffer::new(),
-            start_time: Instant::now(),
-        }
-    }
+// impl<const N: usize> AnimationManager<N> {
+//     pub fn new() -> Self {
+//         Self {
+//             animations: HeaplessVec::new(),
+//             buffer: LedStateBuffer::new(),
+//             start_time: Instant::now(),
+//         }
+//     }
 
-    pub fn add_animation(&mut self, animation: &'static dyn Animation<N>) {
-        self.animations.push(animation).ok(); // Ignore if full
-    }
+//     pub fn add_animation(&mut self, animation: &'static dyn Animation) {
+//         self.animations.push(animation).ok(); // Ignore if full
+//     }
 
-    /// Render current frame of all animations
-    pub fn render(&mut self, current_time: Instant) -> &[(Color, Priority)] {
-        let timestamp = current_time - self.start_time;
+//     /// Render current frame of all animations
+//     pub fn render(&mut self, current_time: Instant) -> &[(Color, Priority)] {
+//         let timestamp = current_time - self.start_time;
 
-        // Clear buffer for new frame
-        self.buffer.clear();
+//         // Clear buffer for new frame
+//         self.buffer.clear();
 
-        // Render each animation in order (higher priority animations render last)
-        for animation in self.animations.iter().filter(|a| !a.is_finished()) {
-            animation.render(timestamp, &mut self.buffer);
-        }
+//         // Render each animation in order (higher priority animations render last)
+//         for animation in self.animations.iter().filter(|a| !a.is_finished()) {
+//             animation.render(timestamp, &mut self.buffer);
+//         }
 
-        self.buffer.get_colors()
-    }
-}
+//         self.buffer.get_colors()
+//     }
+// }
 
 /// Manages a queue of animations and cycles through them
-pub struct AnimationQueue<const N: usize> {
-    animations: HeaplessVec<&'static dyn Animation<N>, 8>, // Fixed max number of animations
+pub struct AnimationQueue {
+    animations: HeaplessVec<&'static Animations, 8>, // Fixed max number of animations
     current_index: usize,
-    buffer: LedStateBuffer<N>,
     start_time: Instant,
 }
 
-impl<const N: usize> AnimationQueue<N> {
+impl AnimationQueue {
     pub fn new() -> Self {
         Self {
             animations: HeaplessVec::new(),
             current_index: 0,
-            buffer: LedStateBuffer::new(),
             start_time: Instant::now(),
         }
     }
 
-    pub fn add_animation(&mut self, animation: &'static dyn Animation<N>) {
+    pub fn add_animation(&mut self, animation: &'static Animations) {
         self.animations.push(animation).ok(); // Ignore if full
     }
 
@@ -139,9 +91,13 @@ impl<const N: usize> AnimationQueue<N> {
     }
 
     /// Render current frame of the current animation
-    pub fn render(&mut self, current_time: Instant) -> &[(Color, Priority)] {
+    pub fn render<const N: usize, C: Circuit<N>>(
+        &mut self,
+        circuit: &mut C,
+        current_time: Instant,
+    ) {
         // Clear buffer for new frame
-        self.buffer.clear();
+        circuit.led_buffer().clear();
 
         if let Some(animation) = self.animations.get(self.current_index) {
             // Auto-advance if current animation is finished
@@ -149,14 +105,12 @@ impl<const N: usize> AnimationQueue<N> {
                 self.next_animation();
                 // Get the new animation after advancing
                 if let Some(new_animation) = self.animations.get(self.current_index) {
-                    new_animation.render(current_time - self.start_time, &mut self.buffer);
+                    new_animation.render(circuit, current_time - self.start_time);
                 }
             } else {
-                animation.render(current_time - self.start_time, &mut self.buffer);
+                animation.render(circuit, current_time - self.start_time);
             }
         }
-
-        self.buffer.get_colors()
     }
 }
 
@@ -166,8 +120,8 @@ pub struct WaveAnimation {
     pub wavelength: f32,
 }
 
-impl<const N: usize> Animation<N> for WaveAnimation {
-    fn render(&self, timestamp: Duration, buffer: &mut LedStateBuffer<N>) {
+impl Animation for WaveAnimation {
+    fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, timestamp: Duration) {
         let t = timestamp.as_micros() as f32 * 1e-6;
 
         // Generate wave pattern on the fly
@@ -175,10 +129,10 @@ impl<const N: usize> Animation<N> for WaveAnimation {
             let phase = (i as f32 / self.wavelength + t * self.speed) % 1.0;
             // Map sine wave (-1 to 1) to brightness (0 to 150)
             let brightness = ((sinf(phase * core::f32::consts::PI * 2.0) + 1.0) * 75.0) as u8;
-            buffer.set_led(
+            circuit.led_buffer().set_led(
                 i,
                 Color(brightness, brightness / 10, brightness / 10), // Use all channels for better visibility
-                <WaveAnimation as Animation<N>>::priority(&self),
+                <WaveAnimation as Animation>::priority(&self),
             );
         }
     }
@@ -189,5 +143,33 @@ impl<const N: usize> Animation<N> for WaveAnimation {
 
     fn priority(&self) -> Priority {
         Priority::Background
+    }
+}
+
+pub enum Animations {
+    Sunset(SunsetGlow),
+    Static(StaticColor),
+}
+
+impl Animation for Animations {
+    fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, timestamp: Duration) {
+        match self {
+            Animations::Sunset(animation) => animation.render(circuit, timestamp),
+            Animations::Static(animation) => animation.render(circuit, timestamp),
+        }
+    }
+
+    fn is_finished(&self) -> bool {
+        match self {
+            Animations::Sunset(animation) => animation.is_finished(),
+            Animations::Static(animation) => animation.is_finished(),
+        }
+    }
+
+    fn priority(&self) -> Priority {
+        match self {
+            Animations::Sunset(animation) => animation.priority(),
+            Animations::Static(animation) => animation.priority(),
+        }
     }
 }
