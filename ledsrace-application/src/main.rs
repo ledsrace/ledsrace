@@ -31,7 +31,7 @@ mod zandvoort;
 
 use static_cell::StaticCell;
 
-use ledsrace_logic::animation::Animations;
+use ledsrace_logic::animation::{basic::ShowSectors, Animations};
 use ledsrace_logic::{animation::advanced::SunsetGlow, Circuit};
 use ledsrace_logic::{
     animation::{basic::StaticColor, AnimationQueue},
@@ -123,10 +123,18 @@ async fn led_task2(
     static SUNSET: Animations = Animations::Sunset(SunsetGlow::new());
     static STATIC_COLOR: Animations = Animations::Static(StaticColor::new(Color(255, 0, 0)));
 
+    // Sector animation with purple, green and yellow f1 sector colors
+    static SECTOR: Animations = Animations::ShowSectors(ShowSectors::new(
+        Color(101, 10, 50),
+        Color(30, 150, 1),
+        Color(160, 106, 2),
+    ));
+
     let mut queue = AnimationQueue::new();
 
     queue.add_animation(&STATIC_COLOR);
     queue.add_animation(&SUNSET);
+    queue.add_animation(&SECTOR);
 
     receiver.receive().await;
 

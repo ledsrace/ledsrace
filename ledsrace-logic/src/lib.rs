@@ -23,6 +23,7 @@ impl Point {
 }
 
 /// Enum representing the different sectors of the circuit
+#[derive(Clone, Copy)]
 pub enum Sector {
     _1,
     _2,
@@ -40,6 +41,9 @@ pub trait Circuit<const N: usize> {
 
     /// Returns the positions of all LEDs in a specific sector
     fn sectors(&self, sector: Sector) -> &'static [Point];
+
+    /// Returns the indices of all LEDs in a specific sector
+    fn sector_indices(&self, sector: Sector) -> core::ops::Range<usize>;
 
     /// Returns a mutable reference to the LED buffer
     fn led_buffer(&mut self) -> &mut LedStateBuffer<N>;

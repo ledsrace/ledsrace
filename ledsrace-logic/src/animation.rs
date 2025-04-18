@@ -1,5 +1,5 @@
 use advanced::SunsetGlow;
-use basic::StaticColor;
+use basic::{ShowSectors, StaticColor};
 use embassy_time::{Duration, Instant};
 use heapless::Vec as HeaplessVec;
 use libm::sinf;
@@ -149,6 +149,7 @@ impl Animation for WaveAnimation {
 pub enum Animations {
     Sunset(SunsetGlow),
     Static(StaticColor),
+    ShowSectors(ShowSectors),
 }
 
 impl Animation for Animations {
@@ -156,6 +157,7 @@ impl Animation for Animations {
         match self {
             Animations::Sunset(animation) => animation.render(circuit, timestamp),
             Animations::Static(animation) => animation.render(circuit, timestamp),
+            Animations::ShowSectors(animation) => animation.render(circuit, timestamp),
         }
     }
 
@@ -163,6 +165,7 @@ impl Animation for Animations {
         match self {
             Animations::Sunset(animation) => animation.is_finished(),
             Animations::Static(animation) => animation.is_finished(),
+            Animations::ShowSectors(animation) => animation.is_finished(),
         }
     }
 
@@ -170,6 +173,7 @@ impl Animation for Animations {
         match self {
             Animations::Sunset(animation) => animation.priority(),
             Animations::Static(animation) => animation.priority(),
+            Animations::ShowSectors(animation) => animation.priority(),
         }
     }
 }

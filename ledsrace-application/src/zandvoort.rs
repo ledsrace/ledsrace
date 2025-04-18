@@ -244,10 +244,14 @@ impl<const N: usize> Circuit<N> for Zandvoort<N> {
     }
 
     fn sectors(&self, sector: Sector) -> &'static [Point] {
+        &self.led_positions()[self.sector_indices(sector)]
+    }
+
+    fn sector_indices(&self, sector: Sector) -> core::ops::Range<usize> {
         match sector {
-            Sector::_1 => &LED_POSITIONS_SORTED[0..65],
-            Sector::_2 => &LED_POSITIONS_SORTED[65..130],
-            Sector::_3 => &LED_POSITIONS_SORTED[130..216],
+            Sector::_1 => 0..77,
+            Sector::_2 => 77..153,
+            Sector::_3 => 153..216,
         }
     }
 

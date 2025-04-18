@@ -25,9 +25,9 @@ where
     // Function to create an LED frame
     fn create_led_frame(red: u16, green: u16, blue: u16) -> [u8; 8] {
         let start_code: u8 = 0b1;
-        let red_gain: u8 = 0b00010; // Regulation level 2 - 2.24 mA
-        let green_gain: u8 = 0b00010; // Regulation level 2 - 2.24 mA
-        let blue_gain: u8 = 0b00010; // Regulation level 2 - 2.24 mA
+        let red_gain: u8 = 0b00000; // Regulation level 2 - 2.24 mA
+        let green_gain: u8 = 0b00000; // Regulation level 2 - 2.24 mA
+        let blue_gain: u8 = 0b00000; // Regulation level 2 - 2.24 mA
 
         // Combine the gain values into a 15-bit number
         let current_gain =

@@ -1,6 +1,6 @@
 use embassy_time::Duration;
 
-use crate::Circuit;
+use crate::{Circuit, Sector};
 
 use super::{Animation, Color, Priority};
 
@@ -69,30 +69,32 @@ impl Animation for StaticColor {
 //     }
 // }
 
-// pub struct ShowSectors {
-//     sectors: [Color; 3],
-// }
+pub struct ShowSectors {
+    sectors: [Color; 3],
+}
 
-// impl ShowSectors {
-//     pub const fn new(sector1: Color, sector2: Color, sector3: Color) -> Self {
-//         Self {
-//             sectors: [sector1, sector2, sector3],
-//         }
-//     }
-// }
+impl ShowSectors {
+    pub const fn new(sector1: Color, sector2: Color, sector3: Color) -> Self {
+        Self {
+            sectors: [sector1, sector2, sector3],
+        }
+    }
+}
 
-// impl<const N: usize> Animation<N> for ShowSectors {
-//     fn render(&self, circuit: &impl Circuit, _timestamp: Duration, buffer: &mut LedStateBuffer<N>) {
-//         for i in 0..N {
-//             buffer.set_led(i, circuit.led_positions()[i], Priority::Background);
-//         }
-//     }
+impl Animation for ShowSectors {
+    fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, _timestamp: Duration) {
+        for (c, sector) in [Sector::_1, Sector::_2, Sector::_3].iter().enumerate() {
+            for led in circuit.sector_indices(*sector) {
+                circuit.set_led(led, self.sectors[c], Priority::Background);
+            }
+        }
+    }
 
-//     fn is_finished(&self) -> bool {
-//         false
-//     }
+    fn is_finished(&self) -> bool {
+        false
+    }
 
-//     fn priority(&self) -> Priority {
-//         Priority::Background
-//     }
-// }
+    fn priority(&self) -> Priority {
+        Priority::Background
+    }
+}
