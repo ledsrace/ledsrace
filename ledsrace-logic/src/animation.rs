@@ -1,5 +1,3 @@
-use advanced::SunsetGlow;
-use basic::{ShowSectors, StaticColor};
 use embassy_time::{Duration, Instant};
 use heapless::Vec as HeaplessVec;
 use libm::sinf;
@@ -8,6 +6,9 @@ use crate::{Circuit, Color, Priority};
 
 pub mod advanced;
 pub mod basic;
+
+use advanced::*;
+use basic::*;
 
 /// Core trait for all animations
 pub trait Animation {
@@ -150,6 +151,7 @@ pub enum Animations {
     Sunset(SunsetGlow),
     Static(StaticColor),
     ShowSectors(ShowSectors),
+    SectorFrames(SectorFrames),
 }
 
 impl Animation for Animations {
@@ -158,6 +160,7 @@ impl Animation for Animations {
             Animations::Sunset(animation) => animation.render(circuit, timestamp),
             Animations::Static(animation) => animation.render(circuit, timestamp),
             Animations::ShowSectors(animation) => animation.render(circuit, timestamp),
+            Animations::SectorFrames(animation) => animation.render(circuit, timestamp),
         }
     }
 
@@ -166,6 +169,7 @@ impl Animation for Animations {
             Animations::Sunset(animation) => animation.is_finished(),
             Animations::Static(animation) => animation.is_finished(),
             Animations::ShowSectors(animation) => animation.is_finished(),
+            Animations::SectorFrames(animation) => animation.is_finished(),
         }
     }
 
@@ -174,6 +178,7 @@ impl Animation for Animations {
             Animations::Sunset(animation) => animation.priority(),
             Animations::Static(animation) => animation.priority(),
             Animations::ShowSectors(animation) => animation.priority(),
+            Animations::SectorFrames(animation) => animation.priority(),
         }
     }
 }

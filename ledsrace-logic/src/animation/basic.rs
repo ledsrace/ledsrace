@@ -1,4 +1,7 @@
+use core::cell::Cell;
+
 use embassy_time::Duration;
+use heapless::Vec;
 
 use crate::{Circuit, Sector};
 
@@ -87,6 +90,65 @@ impl Animation for ShowSectors {
             for led in circuit.sector_indices(*sector) {
                 circuit.set_led(led, self.sectors[c], Priority::Background);
             }
+        }
+    }
+
+    fn is_finished(&self) -> bool {
+        false
+    }
+
+    fn priority(&self) -> Priority {
+        Priority::Background
+    }
+}
+
+pub struct SectorFrames {
+    frames: Vec<[Color; 3], 10>,
+    current_frame: Cell<usize>,
+    last_update: Cell<Duration>,
+    interval: Duration,
+}
+
+unsafe impl Sync for SectorFrames {}
+
+impl SectorFrames {
+    pub const fn new(interval: Duration) -> Self {
+        // let mut frames = Vec::new();
+        // for frame in sector_frames {
+        //     frames.push(*frame);
+        // }
+        Self {
+            frames: Vec::new(),
+            current_frame: Cell::new(0),
+            last_update: Cell::new(Duration::from_millis(0)),
+            interval,
+        }
+    }
+
+    pub fn add_frame(&mut self, frame: [Color; 3]) {
+        self.frames.push(frame).unwrap();
+    }
+}
+
+impl Animation for SectorFrames {
+    fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, timestamp: Duration) {
+        for (c, sector) in [Sector::_1, Sector::_2, Sector::_3].iter().enumerate() {
+            for led in circuit.sector_indices(*sector) {
+                circuit.set_led(
+                    led,
+                    self.frames[self.current_frame.get()][c],
+                    Priority::Background,
+                );
+            }
+        }
+
+        let last = self.last_update.get();
+        let t_diff = timestamp - last;
+
+        if t_diff >= self.interval {
+            self.last_update.set(timestamp);
+            self.current_frame
+                .set((self.current_frame.get() + 1) % self.frames.len());
         }
     }
 

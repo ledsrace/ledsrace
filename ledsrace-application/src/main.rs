@@ -29,14 +29,17 @@ use zandvoort::Zandvoort;
 mod hd108;
 mod zandvoort;
 
-use static_cell::StaticCell;
-
-use ledsrace_logic::animation::{basic::ShowSectors, Animations};
+use ledsrace_logic::animation::{
+    basic::{SectorFrames, ShowSectors},
+    Animations,
+};
 use ledsrace_logic::{animation::advanced::SunsetGlow, Circuit};
 use ledsrace_logic::{
     animation::{basic::StaticColor, AnimationQueue},
     Color,
 };
+use once_cell::sync::Lazy;
+use static_cell::StaticCell;
 
 use hd108::HD108;
 
@@ -120,21 +123,37 @@ async fn led_task2(
     mut hd108: HD108<SpiDmaBus<'static, Async>, LED_COUNT>,
     receiver: Receiver<'static, NoopRawMutex, Message, 1>,
 ) {
+    const OFF: Color = Color(0, 0, 0);
+    const PURPLE: Color = Color(101, 10, 50);
+    const GREEN: Color = Color(30, 150, 1);
+    const YELLOW: Color = Color(160, 106, 2);
     static SUNSET: Animations = Animations::Sunset(SunsetGlow::new());
     static STATIC_COLOR: Animations = Animations::Static(StaticColor::new(Color(255, 0, 0)));
 
     // Sector animation with purple, green and yellow f1 sector colors
-    static SECTOR: Animations = Animations::ShowSectors(ShowSectors::new(
-        Color(101, 10, 50),
-        Color(30, 150, 1),
-        Color(160, 106, 2),
-    ));
+    static SECTOR: Animations = Animations::ShowSectors(ShowSectors::new(PURPLE, GREEN, YELLOW));
+
+    static SECTOR_FRAMES: Lazy<Animations> = Lazy::new(|| {
+        let mut frames = SectorFrames::new(Duration::from_millis(1000));
+        frames.add_frame([OFF, OFF, OFF]);
+        frames.add_frame([PURPLE, OFF, OFF]);
+        frames.add_frame([PURPLE, PURPLE, OFF]);
+        frames.add_frame([GREEN, PURPLE, OFF]);
+        frames.add_frame([GREEN, PURPLE, PURPLE]);
+        frames.add_frame([GREEN, GREEN, PURPLE]);
+        frames.add_frame([GREEN, GREEN, GREEN]);
+        frames.add_frame([YELLOW, GREEN, GREEN]);
+        frames.add_frame([YELLOW, YELLOW, GREEN]);
+        frames.add_frame([YELLOW, YELLOW, YELLOW]);
+        Animations::SectorFrames(frames)
+    });
 
     let mut queue = AnimationQueue::new();
 
     queue.add_animation(&STATIC_COLOR);
     queue.add_animation(&SUNSET);
     queue.add_animation(&SECTOR);
+    queue.add_animation(&*SECTOR_FRAMES);
 
     receiver.receive().await;
 
