@@ -113,10 +113,6 @@ unsafe impl Sync for SectorFrames {}
 
 impl SectorFrames {
     pub const fn new(interval: Duration) -> Self {
-        // let mut frames = Vec::new();
-        // for frame in sector_frames {
-        //     frames.push(*frame);
-        // }
         Self {
             frames: Vec::new(),
             current_frame: Cell::new(0),

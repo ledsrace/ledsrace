@@ -134,11 +134,11 @@ async fn led_task2(
     static SECTOR: Animations = Animations::ShowSectors(ShowSectors::new(PURPLE, GREEN, YELLOW));
 
     static SECTOR_FRAMES: Lazy<Animations> = Lazy::new(|| {
-        let mut frames = SectorFrames::new(Duration::from_millis(1000));
+        let mut frames = SectorFrames::new(Duration::from_millis(750));
         frames.add_frame([OFF, OFF, OFF]);
         frames.add_frame([PURPLE, OFF, OFF]);
         frames.add_frame([PURPLE, PURPLE, OFF]);
-        frames.add_frame([GREEN, PURPLE, OFF]);
+        frames.add_frame([PURPLE, PURPLE, PURPLE]);
         frames.add_frame([GREEN, PURPLE, PURPLE]);
         frames.add_frame([GREEN, GREEN, PURPLE]);
         frames.add_frame([GREEN, GREEN, GREEN]);
@@ -150,10 +150,10 @@ async fn led_task2(
 
     let mut queue = AnimationQueue::new();
 
-    queue.add_animation(&STATIC_COLOR);
-    queue.add_animation(&SUNSET);
-    queue.add_animation(&SECTOR);
     queue.add_animation(&*SECTOR_FRAMES);
+    queue.add_animation(&SUNSET);
+    // queue.add_animation(&STATIC_COLOR);
+    // queue.add_animation(&SECTOR);
 
     receiver.receive().await;
 
