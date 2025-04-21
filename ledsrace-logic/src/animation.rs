@@ -1,4 +1,3 @@
-use core::cell::Cell;
 use embassy_time::{Duration, Instant};
 use heapless::Vec as HeaplessVec;
 use libm::sinf;
@@ -7,6 +6,8 @@ use crate::{Circuit, Color, Priority};
 
 mod advanced;
 mod basic;
+mod circuit_pulse;
+mod dutch_flag;
 mod ghost_car;
 mod lightning_sprint;
 mod mexican_wave;
@@ -17,6 +18,8 @@ mod unicorn_rainbow;
 
 pub use advanced::*;
 pub use basic::*;
+pub use circuit_pulse::*;
+pub use dutch_flag::*;
 pub use ghost_car::*;
 pub use lightning_sprint::*;
 pub use mexican_wave::*;
@@ -80,7 +83,7 @@ pub trait Animation {
 
 /// Manages a queue of animations and cycles through them
 pub struct AnimationQueue {
-    animations: HeaplessVec<&'static Animations, 8>, // Fixed max number of animations
+    animations: HeaplessVec<&'static Animations, 12>, // Fixed max number of animations
     current_index: usize,
     start_time: Instant,
 }
@@ -174,6 +177,8 @@ pub enum Animations {
     LightningSprint(LightningSprint),
     MexicanWave(MexicanWave),
     UnicornRainbow(UnicornRainbow),
+    DutchFlag(DutchFlag),
+    CircuitPulse(CircuitPulse),
 }
 
 impl Animation for Animations {
@@ -190,6 +195,8 @@ impl Animation for Animations {
             Animations::LightningSprint(animation) => animation.render(circuit, timestamp),
             Animations::MexicanWave(animation) => animation.render(circuit, timestamp),
             Animations::UnicornRainbow(animation) => animation.render(circuit, timestamp),
+            Animations::DutchFlag(animation) => animation.render(circuit, timestamp),
+            Animations::CircuitPulse(animation) => animation.render(circuit, timestamp),
         }
     }
 
@@ -206,6 +213,8 @@ impl Animation for Animations {
             Animations::LightningSprint(animation) => animation.is_finished(),
             Animations::MexicanWave(animation) => animation.is_finished(),
             Animations::UnicornRainbow(animation) => animation.is_finished(),
+            Animations::DutchFlag(animation) => animation.is_finished(),
+            Animations::CircuitPulse(animation) => animation.is_finished(),
         }
     }
 
@@ -222,6 +231,8 @@ impl Animation for Animations {
             Animations::LightningSprint(animation) => animation.priority(),
             Animations::MexicanWave(animation) => animation.priority(),
             Animations::UnicornRainbow(animation) => animation.priority(),
+            Animations::DutchFlag(animation) => animation.priority(),
+            Animations::CircuitPulse(animation) => animation.priority(),
         }
     }
 }

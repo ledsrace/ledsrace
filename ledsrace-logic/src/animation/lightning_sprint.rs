@@ -2,7 +2,6 @@
 // This animation produces a lightning bolt effect that streaks along the track with a fading trail.
 
 use crate::animation::Animation;
-use crate::Circuit;
 use crate::Color;
 use crate::Priority;
 use core::cell::Cell;
@@ -37,15 +36,17 @@ pub struct LightningSprint {
     current_pos: Cell<usize>,
     // Each entry holds an Option: Some(led_index) if a trail exists at that position
     trail: [Cell<Option<usize>>; MAX_TRAIL],
+    base_color: Color,
 }
 
 unsafe impl Sync for LightningSprint {}
 
 impl LightningSprint {
-    pub const fn new() -> Self {
+    pub const fn new(base_color: Color) -> Self {
         Self {
             current_pos: Cell::new(0),
             trail: [const { Cell::new(None) }; MAX_TRAIL],
+            base_color,
         }
     }
 }
@@ -84,7 +85,7 @@ impl Animation for LightningSprint {
                 }
                 val
             };
-            let scaled = scale_color(Color(255, 255, 255), intensity);
+            let scaled = scale_color(self.base_color, intensity);
             circuit.set_led(i, scaled, Priority::Normal);
         }
     }

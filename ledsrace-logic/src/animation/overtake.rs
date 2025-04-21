@@ -15,10 +15,14 @@ unsafe impl Sync for OvertakeDuel {}
 
 const COMET_LEN: usize = 7;
 const FLASH_LEN: u8 = 8;
-const A_COLOR: Color = Color(200, 30, 30); // Red
-const B_COLOR: Color = Color(30, 30, 200); // Blue
-const FLASH_COLOR: Color = Color(255, 255, 80); // Yellowish
-const WAKE_COLOR: Color = Color(20, 10, 20); // Subtle background
+// const A_COLOR: Color = Color(200, 30, 30); // Red
+// const B_COLOR: Color = Color(30, 30, 200); // Blue
+// const FLASH_COLOR: Color = Color(255, 255, 80); // Yellowish
+// const WAKE_COLOR: Color = Color(20, 10, 20); // Subtle background
+const A_COLOR: Color = Color(255, 0, 0); // Red
+const B_COLOR: Color = Color(0, 00, 250); // Blue
+const FLASH_COLOR: Color = Color(255, 255, 200); // Yellowish
+const WAKE_COLOR: Color = Color(20, 2, 00); // Subtle background
 
 impl OvertakeDuel {
     pub const fn new(led_count: usize) -> Self {
@@ -76,12 +80,18 @@ impl Animation for OvertakeDuel {
             };
             let a_idx = (self.a_pos.get() + led_count - i) % led_count;
             let b_idx = (self.b_pos.get() + led_count - i) % led_count;
+            // circuit
+            //     .led_buffer()
+            //     .set_led(a_idx, Color(fade,0,0), Priority::Normal);
+            // circuit
+            //     .led_buffer()
+            //     .set_led(b_idx, Color(0,0,fade), Priority::Normal);
             circuit
                 .led_buffer()
-                .set_led(a_idx, Color(fade, fade / 8, fade / 8), Priority::Normal);
+                .set_led(a_idx, A_COLOR, Priority::Normal);
             circuit
                 .led_buffer()
-                .set_led(b_idx, Color(fade / 8, fade / 8, fade), Priority::Normal);
+                .set_led(b_idx, B_COLOR, Priority::Normal);
         }
         // Flash on overtake
         if self.flash_timer.get() > 0 {

@@ -6,8 +6,6 @@ use crate::Circuit;
 
 use super::{Animation, Color, Priority};
 
-use libm::sinf;
-
 /// Maximum number of raindrops that can be active at once
 const MAX_RAINDROPS: usize = 8;
 
