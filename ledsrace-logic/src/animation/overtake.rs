@@ -47,6 +47,11 @@ impl OvertakeDuel {
 }
 
 impl Animation for OvertakeDuel {
+    fn reset(&self) {
+        self.timer.set(0);
+        self.flash_timer.set(0);
+    }
+
     fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, _timestamp: Duration) {
         update_overtake_duel(self, N);
 
@@ -96,7 +101,6 @@ impl Animation for OvertakeDuel {
     fn priority(&self) -> Priority {
         Priority::Normal
     }
-    fn reset(&self) {}
 }
 
 /// State update function for OvertakeDuel (call in main loop or timer)

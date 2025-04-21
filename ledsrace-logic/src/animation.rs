@@ -1,3 +1,4 @@
+use core::cell::Cell;
 use embassy_time::{Duration, Instant};
 use heapless::Vec as HeaplessVec;
 use libm::sinf;
@@ -8,15 +9,21 @@ mod advanced;
 mod basic;
 mod ghost_car;
 mod lightning_sprint;
+mod mexican_wave;
 mod overtake;
+mod party;
 mod raindrop;
+mod unicorn_rainbow;
 
 pub use advanced::*;
 pub use basic::*;
 pub use ghost_car::*;
 pub use lightning_sprint::*;
+pub use mexican_wave::*;
 pub use overtake::*;
+pub use party::*;
 pub use raindrop::*;
+pub use unicorn_rainbow::*;
 
 /// Core trait for all animations
 pub trait Animation {
@@ -161,9 +168,12 @@ pub enum Animations {
     ShowSectors(ShowSectors),
     SectorFrames(SectorFrames),
     RainDrop(RainDropRace),
+    Party(Party),
     OvertakeDuel(OvertakeDuel),
     GhostCar(GhostCar),
     LightningSprint(LightningSprint),
+    MexicanWave(MexicanWave),
+    UnicornRainbow(UnicornRainbow),
 }
 
 impl Animation for Animations {
@@ -174,9 +184,12 @@ impl Animation for Animations {
             Animations::ShowSectors(animation) => animation.render(circuit, timestamp),
             Animations::SectorFrames(animation) => animation.render(circuit, timestamp),
             Animations::RainDrop(animation) => animation.render(circuit, timestamp),
+            Animations::Party(animation) => animation.render(circuit, timestamp),
             Animations::OvertakeDuel(animation) => animation.render(circuit, timestamp),
             Animations::GhostCar(animation) => animation.render(circuit, timestamp),
             Animations::LightningSprint(animation) => animation.render(circuit, timestamp),
+            Animations::MexicanWave(animation) => animation.render(circuit, timestamp),
+            Animations::UnicornRainbow(animation) => animation.render(circuit, timestamp),
         }
     }
 
@@ -187,9 +200,12 @@ impl Animation for Animations {
             Animations::ShowSectors(animation) => animation.is_finished(),
             Animations::SectorFrames(animation) => animation.is_finished(),
             Animations::RainDrop(animation) => animation.is_finished(),
+            Animations::Party(animation) => animation.is_finished(),
             Animations::OvertakeDuel(animation) => animation.is_finished(),
             Animations::GhostCar(animation) => animation.is_finished(),
             Animations::LightningSprint(animation) => animation.is_finished(),
+            Animations::MexicanWave(animation) => animation.is_finished(),
+            Animations::UnicornRainbow(animation) => animation.is_finished(),
         }
     }
 
@@ -200,9 +216,12 @@ impl Animation for Animations {
             Animations::ShowSectors(animation) => animation.priority(),
             Animations::SectorFrames(animation) => animation.priority(),
             Animations::RainDrop(animation) => animation.priority(),
+            Animations::Party(animation) => animation.priority(),
             Animations::OvertakeDuel(animation) => animation.priority(),
             Animations::GhostCar(animation) => animation.priority(),
             Animations::LightningSprint(animation) => animation.priority(),
+            Animations::MexicanWave(animation) => animation.priority(),
+            Animations::UnicornRainbow(animation) => animation.priority(),
         }
     }
 }

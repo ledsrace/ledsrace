@@ -157,8 +157,25 @@ async fn led_task2(
         Animations::LightningSprint(anim)
     });
 
+    static MEXICAN_WAVE: Lazy<Animations> = Lazy::new(|| {
+        Animations::MexicanWave(MexicanWave::new(
+            0.2,                // Speed - completes one circuit every 5 seconds
+            20.0,               // Wave width in LEDs
+            Color(180, 40, 40), // Base color (predominantly red)
+        ))
+    });
+
+    static UNICORN_RAINBOW: Lazy<Animations> = Lazy::new(|| {
+        Animations::UnicornRainbow(UnicornRainbow::new(
+            0.1,  // Speed of the rainbow wave
+            30.0, // Wavelength of the rainbow
+        ))
+    });
+
     let mut queue = AnimationQueue::new();
 
+    queue.add_animation(&*UNICORN_RAINBOW);
+    queue.add_animation(&*MEXICAN_WAVE);
     queue.add_animation(&*LIGHTNING_SPRINT);
     queue.add_animation(&*OVERDUEL_ANIM);
     queue.add_animation(&GHOST_CAR);

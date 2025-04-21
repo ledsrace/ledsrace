@@ -24,7 +24,7 @@ struct Raindrop {
 }
 
 /// Animation that simulates raindrops racing around the circuit
-pub struct RainDropRace {
+pub struct Party {
     /// Active raindrops
     raindrops: HeaplessVec<Raindrop, MAX_RAINDROPS>,
     /// Time of last update
@@ -43,9 +43,9 @@ pub struct RainDropRace {
     start_time: Cell<Duration>,
 }
 
-unsafe impl Sync for RainDropRace {}
+unsafe impl Sync for Party {}
 
-impl RainDropRace {
+impl Party {
     pub const fn new(duration: Duration) -> Self {
         Self {
             raindrops: HeaplessVec::new(),
@@ -205,7 +205,7 @@ impl RainDropRace {
     }
 }
 
-impl Animation for RainDropRace {
+impl Animation for Party {
     fn reset(&self) {
         self.start_time.set(Duration::from_millis(0));
         self.last_update.set(Duration::from_millis(0));

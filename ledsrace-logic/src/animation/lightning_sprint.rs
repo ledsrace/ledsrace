@@ -51,6 +51,10 @@ impl LightningSprint {
 }
 
 impl Animation for LightningSprint {
+    fn reset(&self) {
+        self.current_pos.set(0);
+    }
+
     // The render method will be called on each frame. It moves the lightning bolt along the LED strip.
     // The current head becomes the brightest LED while previous positions form a fading trail.
     fn render<const N: usize, C: crate::Circuit<N>>(&self, circuit: &mut C, _timestamp: Duration) {

@@ -27,6 +27,10 @@ impl GhostCar {
 }
 
 impl Animation for GhostCar {
+    fn reset(&self) {
+        self.current_position.set(0.0);
+    }
+
     fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, timestamp: Duration) {
         let led_count = circuit.led_count();
         let t = timestamp.as_secs() as f32;
