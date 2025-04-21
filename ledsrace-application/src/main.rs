@@ -29,15 +29,7 @@ use zandvoort::Zandvoort;
 mod hd108;
 mod zandvoort;
 
-use ledsrace_logic::animation::{
-    basic::{SectorFrames, ShowSectors},
-    Animations,
-};
-use ledsrace_logic::{animation::advanced::SunsetGlow, Circuit};
-use ledsrace_logic::{
-    animation::{basic::StaticColor, AnimationQueue},
-    Color,
-};
+use ledsrace_logic::{animation::*, Circuit, Color};
 use once_cell::sync::Lazy;
 use static_cell::StaticCell;
 
@@ -148,8 +140,29 @@ async fn led_task2(
         Animations::SectorFrames(frames)
     });
 
+    // RainDrop Race animation - runs for 30 seconds before finishing
+    static RAINDROP: Animations = Animations::RainDrop(RainDropRace::new(Duration::from_secs(30)));
+
+    // static OVERDUEL: StaticCell<OvertakeDuel> = StaticCell::new();
+    // static OVERDUEL_ANIM: StaticCell<Animations> = StaticCell::new();
+    static OVERDUEL_ANIM: Lazy<Animations> = Lazy::new(|| {
+        let mut a = OvertakeDuel::new(LED_COUNT);
+        Animations::OvertakeDuel(a)
+    });
+
+    static GHOST_CAR: Animations = Animations::GhostCar(GhostCar::new(0.1, 10, Color(150, 5, 10)));
+
+    static LIGHTNING_SPRINT: Lazy<Animations> = Lazy::new(|| {
+        let anim = LightningSprint::new();
+        Animations::LightningSprint(anim)
+    });
+
     let mut queue = AnimationQueue::new();
 
+    queue.add_animation(&*LIGHTNING_SPRINT);
+    queue.add_animation(&*OVERDUEL_ANIM);
+    queue.add_animation(&GHOST_CAR);
+    queue.add_animation(&RAINDROP);
     queue.add_animation(&*SECTOR_FRAMES);
     queue.add_animation(&SUNSET);
     // queue.add_animation(&STATIC_COLOR);
