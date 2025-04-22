@@ -177,6 +177,36 @@ impl Animation for WaveAnimation {
     }
 }
 
+macro_rules! impl_animation_for_enum {
+    ($enum_name:ident, $($variant:ident),+) => {
+        impl Animation for $enum_name {
+            fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, timestamp: Duration) {
+                match self {
+                    $( $enum_name::$variant(animation) => animation.render(circuit, timestamp), )+
+                }
+            }
+
+            fn is_finished(&self) -> bool {
+                match self {
+                    $( $enum_name::$variant(animation) => animation.is_finished(), )+
+                }
+            }
+
+            fn priority(&self) -> Priority {
+                match self {
+                    $( $enum_name::$variant(animation) => animation.priority(), )+
+                }
+            }
+
+            fn reset(&self) {
+                match self {
+                    $( $enum_name::$variant(animation) => animation.reset(), )+
+                }
+            }
+        }
+    };
+}
+
 pub enum Animations {
     Sunset(SunsetGlow),
     Static(StaticColor),
@@ -194,83 +224,23 @@ pub enum Animations {
     GrowingTrail(GrowingTrail),
 }
 
-impl Animation for Animations {
-    fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, timestamp: Duration) {
-        match self {
-            Animations::Sunset(animation) => animation.render(circuit, timestamp),
-            Animations::Static(animation) => animation.render(circuit, timestamp),
-            Animations::ShowSectors(animation) => animation.render(circuit, timestamp),
-            Animations::SectorFrames(animation) => animation.render(circuit, timestamp),
-            Animations::RainDrop(animation) => animation.render(circuit, timestamp),
-            Animations::Party(animation) => animation.render(circuit, timestamp),
-            Animations::OvertakeDuel(animation) => animation.render(circuit, timestamp),
-            Animations::GhostCar(animation) => animation.render(circuit, timestamp),
-            Animations::LightningSprint(animation) => animation.render(circuit, timestamp),
-            Animations::MexicanWave(animation) => animation.render(circuit, timestamp),
-            Animations::UnicornRainbow(animation) => animation.render(circuit, timestamp),
-            Animations::DutchFlag(animation) => animation.render(circuit, timestamp),
-            Animations::CircuitPulse(animation) => animation.render(circuit, timestamp),
-            Animations::GrowingTrail(animation) => animation.render(circuit, timestamp),
-        }
-    }
-
-    fn is_finished(&self) -> bool {
-        match self {
-            Animations::Sunset(animation) => animation.is_finished(),
-            Animations::Static(animation) => animation.is_finished(),
-            Animations::ShowSectors(animation) => animation.is_finished(),
-            Animations::SectorFrames(animation) => animation.is_finished(),
-            Animations::RainDrop(animation) => animation.is_finished(),
-            Animations::Party(animation) => animation.is_finished(),
-            Animations::OvertakeDuel(animation) => animation.is_finished(),
-            Animations::GhostCar(animation) => animation.is_finished(),
-            Animations::LightningSprint(animation) => animation.is_finished(),
-            Animations::MexicanWave(animation) => animation.is_finished(),
-            Animations::UnicornRainbow(animation) => animation.is_finished(),
-            Animations::DutchFlag(animation) => animation.is_finished(),
-            Animations::CircuitPulse(animation) => animation.is_finished(),
-            Animations::GrowingTrail(animation) => animation.is_finished(),
-        }
-    }
-
-    fn priority(&self) -> Priority {
-        match self {
-            Animations::Sunset(animation) => animation.priority(),
-            Animations::Static(animation) => animation.priority(),
-            Animations::ShowSectors(animation) => animation.priority(),
-            Animations::SectorFrames(animation) => animation.priority(),
-            Animations::RainDrop(animation) => animation.priority(),
-            Animations::Party(animation) => animation.priority(),
-            Animations::OvertakeDuel(animation) => animation.priority(),
-            Animations::GhostCar(animation) => animation.priority(),
-            Animations::LightningSprint(animation) => animation.priority(),
-            Animations::MexicanWave(animation) => animation.priority(),
-            Animations::UnicornRainbow(animation) => animation.priority(),
-            Animations::DutchFlag(animation) => animation.priority(),
-            Animations::CircuitPulse(animation) => animation.priority(),
-            Animations::GrowingTrail(animation) => animation.priority(),
-        }
-    }
-
-    fn reset(&self) {
-        match self {
-            Animations::Sunset(animation) => animation.reset(),
-            Animations::Static(animation) => animation.reset(),
-            Animations::ShowSectors(animation) => animation.reset(),
-            Animations::SectorFrames(animation) => animation.reset(),
-            Animations::RainDrop(animation) => animation.reset(),
-            Animations::Party(animation) => animation.reset(),
-            Animations::OvertakeDuel(animation) => animation.reset(),
-            Animations::GhostCar(animation) => animation.reset(),
-            Animations::LightningSprint(animation) => animation.reset(),
-            Animations::MexicanWave(animation) => animation.reset(),
-            Animations::UnicornRainbow(animation) => animation.reset(),
-            Animations::DutchFlag(animation) => animation.reset(),
-            Animations::CircuitPulse(animation) => animation.reset(),
-            Animations::GrowingTrail(animation) => animation.reset(),
-        }
-    }
-}
+impl_animation_for_enum!(
+    Animations,
+    Sunset,
+    Static,
+    ShowSectors,
+    SectorFrames,
+    RainDrop,
+    Party,
+    OvertakeDuel,
+    GhostCar,
+    LightningSprint,
+    MexicanWave,
+    UnicornRainbow,
+    DutchFlag,
+    CircuitPulse,
+    GrowingTrail
+);
 
 // Helper function to scale a Color by the given brightness factor (0.0 to 1.0).
 pub fn scale_color(color: Color, brightness: f32) -> Color {
