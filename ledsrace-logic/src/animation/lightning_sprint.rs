@@ -85,7 +85,7 @@ impl Animation for LightningSprint {
                 }
                 val
             };
-            let scaled = scale_color(self.base_color, intensity);
+            let scaled = crate::animation::scale_color(self.base_color, intensity);
             circuit.set_led(i, scaled, Priority::Normal);
         }
     }
@@ -106,13 +106,4 @@ fn exp_decay(base: f32, exp: i32) -> f32 {
         result *= base;
     }
     result
-}
-
-// Helper function to scale a Color by the given brightness factor (0.0 to 1.0).
-fn scale_color(color: Color, brightness: f32) -> Color {
-    // Assuming Color is defined as Color(u8, u8, u8)
-    let r = (color.0 as f32 * brightness).min(255.0) as u8;
-    let g = (color.1 as f32 * brightness).min(255.0) as u8;
-    let b = (color.2 as f32 * brightness).min(255.0) as u8;
-    Color(r, g, b)
 }

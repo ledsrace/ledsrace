@@ -9,6 +9,7 @@ mod basic;
 mod circuit_pulse;
 mod dutch_flag;
 mod ghost_car;
+mod growing_trail;
 mod lightning_sprint;
 mod mexican_wave;
 mod overtake;
@@ -21,6 +22,7 @@ pub use basic::*;
 pub use circuit_pulse::*;
 pub use dutch_flag::*;
 pub use ghost_car::*;
+pub use growing_trail::*;
 pub use lightning_sprint::*;
 pub use mexican_wave::*;
 pub use overtake::*;
@@ -85,15 +87,19 @@ pub trait Animation {
 pub struct AnimationQueue {
     animations: HeaplessVec<&'static Animations, 12>, // Fixed max number of animations
     current_index: usize,
+    /// Start time of the current animation
     start_time: Instant,
+    /// Maximum duration of an animation
+    max_duration: Duration,
 }
 
 impl AnimationQueue {
-    pub fn new() -> Self {
+    pub fn new(max_duration: Duration) -> Self {
         Self {
             animations: HeaplessVec::new(),
             current_index: 0,
             start_time: Instant::now(),
+            max_duration,
         }
     }
 
@@ -120,14 +126,20 @@ impl AnimationQueue {
 
         if let Some(animation) = self.animations.get(self.current_index) {
             // Auto-advance if current animation is finished
-            if animation.is_finished() {
+            if animation.is_finished() || self.start_time.elapsed() > self.max_duration {
                 self.next_animation();
                 // Get the new animation after advancing
                 if let Some(new_animation) = self.animations.get(self.current_index) {
-                    new_animation.render(circuit, current_time - self.start_time);
+                    new_animation.render(
+                        circuit,
+                        current_time.saturating_duration_since(self.start_time),
+                    );
                 }
             } else {
-                animation.render(circuit, current_time - self.start_time);
+                animation.render(
+                    circuit,
+                    current_time.saturating_duration_since(self.start_time),
+                );
             }
         }
     }
@@ -179,6 +191,7 @@ pub enum Animations {
     UnicornRainbow(UnicornRainbow),
     DutchFlag(DutchFlag),
     CircuitPulse(CircuitPulse),
+    GrowingTrail(GrowingTrail),
 }
 
 impl Animation for Animations {
@@ -197,6 +210,7 @@ impl Animation for Animations {
             Animations::UnicornRainbow(animation) => animation.render(circuit, timestamp),
             Animations::DutchFlag(animation) => animation.render(circuit, timestamp),
             Animations::CircuitPulse(animation) => animation.render(circuit, timestamp),
+            Animations::GrowingTrail(animation) => animation.render(circuit, timestamp),
         }
     }
 
@@ -215,6 +229,7 @@ impl Animation for Animations {
             Animations::UnicornRainbow(animation) => animation.is_finished(),
             Animations::DutchFlag(animation) => animation.is_finished(),
             Animations::CircuitPulse(animation) => animation.is_finished(),
+            Animations::GrowingTrail(animation) => animation.is_finished(),
         }
     }
 
@@ -233,6 +248,35 @@ impl Animation for Animations {
             Animations::UnicornRainbow(animation) => animation.priority(),
             Animations::DutchFlag(animation) => animation.priority(),
             Animations::CircuitPulse(animation) => animation.priority(),
+            Animations::GrowingTrail(animation) => animation.priority(),
         }
     }
+
+    fn reset(&self) {
+        match self {
+            Animations::Sunset(animation) => animation.reset(),
+            Animations::Static(animation) => animation.reset(),
+            Animations::ShowSectors(animation) => animation.reset(),
+            Animations::SectorFrames(animation) => animation.reset(),
+            Animations::RainDrop(animation) => animation.reset(),
+            Animations::Party(animation) => animation.reset(),
+            Animations::OvertakeDuel(animation) => animation.reset(),
+            Animations::GhostCar(animation) => animation.reset(),
+            Animations::LightningSprint(animation) => animation.reset(),
+            Animations::MexicanWave(animation) => animation.reset(),
+            Animations::UnicornRainbow(animation) => animation.reset(),
+            Animations::DutchFlag(animation) => animation.reset(),
+            Animations::CircuitPulse(animation) => animation.reset(),
+            Animations::GrowingTrail(animation) => animation.reset(),
+        }
+    }
+}
+
+// Helper function to scale a Color by the given brightness factor (0.0 to 1.0).
+pub fn scale_color(color: Color, brightness: f32) -> Color {
+    // Assuming Color is defined as Color(u8, u8, u8)
+    let r = (color.0 as f32 * brightness).min(255.0) as u8;
+    let g = (color.1 as f32 * brightness).min(255.0) as u8;
+    let b = (color.2 as f32 * brightness).min(255.0) as u8;
+    Color(r, g, b)
 }

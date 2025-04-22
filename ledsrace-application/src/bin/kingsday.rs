@@ -144,15 +144,22 @@ async fn led_task2(
 
     static STATIC_COLOR: Lazy<Animations> =
         Lazy::new(|| Animations::Static(StaticColor::new(ORANGE)));
-    let mut queue = AnimationQueue::new();
 
-    queue.add_animation(&*LIGHTNING_SPRINT);
+    static GROWING_TRAIL: Lazy<Animations> = Lazy::new(|| {
+        let anim = GrowingTrail::new(ORANGE, 60.0);
+        Animations::GrowingTrail(anim)
+    });
+
+    let mut queue = AnimationQueue::new(Duration::from_secs(5));
+
+    // queue.add_animation(&*LIGHTNING_SPRINT);
+    queue.add_animation(&*GROWING_TRAIL);
     queue.add_animation(&*CIRCUIT_PULSE);
+    queue.add_animation(&*STATIC_COLOR);
     queue.add_animation(&*OVERDUEL_ANIM);
     queue.add_animation(&*DUTCH_FLAG);
-    queue.add_animation(&*STATIC_COLOR);
 
-    receiver.receive().await;
+    // receiver.receive().await;
 
     let frame_duration = Duration::from_millis(20);
     let start = Instant::now();

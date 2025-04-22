@@ -23,6 +23,8 @@ pub struct CircuitPulse {
 
     /// Whether to randomize the position of the pulse
     randomize: bool,
+    /// Whether the animation has finished
+    finished: Cell<bool>,
 }
 
 unsafe impl Sync for CircuitPulse {}
@@ -42,6 +44,7 @@ impl CircuitPulse {
             repeat_interval,
             start_time: Cell::new(None),
             randomize,
+            finished: Cell::new(false),
         }
     }
 
@@ -64,6 +67,7 @@ impl CircuitPulse {
 impl Animation for CircuitPulse {
     fn reset(&self) {
         self.start_time.set(None);
+        self.finished.set(false);
     }
 
     fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, timestamp: Duration) {
@@ -114,21 +118,17 @@ impl Animation for CircuitPulse {
                 );
             }
         }
+
+        // Finish when pulse has moved beyond max distance
+        if elapsed.as_micros() as f32 * 1e-6 * self.speed
+            > max_distance_from_center(led_positions) * 2.0
+        {
+            self.finished.set(true);
+        }
     }
 
     fn is_finished(&self) -> bool {
-        if let Some(interval) = self.repeat_interval {
-            false // Never finish if repeating
-        } else {
-            false
-            // // Finish when pulse has moved beyond max distance
-            // let elapsed = self
-            //     .start_time
-            //     .get()
-            //     .map_or(Duration::from_micros(0), |t| t);
-            // let distance_traveled = elapsed.as_micros() as f32 * 1e-6 * self.speed;
-            // distance_traveled > max_distance_from_center(led_positions) * 2.0
-        }
+        self.finished.get()
     }
 
     fn priority(&self) -> Priority {

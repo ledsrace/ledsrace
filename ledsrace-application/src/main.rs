@@ -187,7 +187,7 @@ async fn led_task2(
 
     static DUTCH_FLAG: Lazy<Animations> = Lazy::new(|| Animations::DutchFlag(DutchFlag::new()));
 
-    let mut queue = AnimationQueue::new();
+    let mut queue = AnimationQueue::new(Duration::from_secs(30));
 
     queue.add_animation(&*LIGHTNING_SPRINT);
     queue.add_animation(&*CIRCUIT_PULSE);
