@@ -46,6 +46,11 @@ You can use this repository as a starting point, or write it yourself from scrat
 
 [Back our project on Kickstarter](https://www.kickstarter.com/projects/jitterdelft/ledsrace-interactive-led-art-of-zandvoort-circuit) and get one or more LEDSRACE boards as a reward.
 
+
+## How to load a new program?
+
+See [FLASH GUIDE BROWSER](docs/FLASH_GUIDE_BROWSER.md) for instructions.
+
 ## License
 
 LEDSRACE firmware is licensed under the MIT license ([LICENSE](LICENSE) or http://opensource.org/licenses/MIT).
