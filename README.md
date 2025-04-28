@@ -40,6 +40,12 @@ You can use this repository as a starting point, or write it yourself from scrat
 - Wifi (currently not implemented in firmware)
 - USB Connection (currently not implemented in firmware)
 
+## How to get one?
+
+![](https://i.kickstarter.com/tq0sfld-kickstarter-logo-green.png?fit=scale-down&origin=static&width=1000&sig=ixapsTNmmPEFl31G4w1YjZiCZpak4bUuMx5ZqHfEiG0%3D)
+
+[Back our project on Kickstarter](https://www.kickstarter.com/projects/jitterdelft/ledsrace-interactive-led-art-of-zandvoort-circuit) and get one or more LEDSRACE boards as a reward.
+
 ## License
 
 LEDSRACE firmware is licensed under the MIT license ([LICENSE](LICENSE) or http://opensource.org/licenses/MIT).
