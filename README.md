@@ -24,7 +24,7 @@ The `ledsrace` crate depends on `ledsrace-core` and has the actual programs that
 
 ### Play back the F1 Grand Prix
 
-We can play the 2023 and 2024 Formula 1
+We can play the 2023 and 2024 Formula 1 races using datasets from openf1.org. The datasets provide 3.7Hz positions updates for all cars on the track. We have downloaded and processed the dataset so that it can be included in the firmware in an efficient binary format.
 
 ![Play F1 Race](img/f1race.jpg)
 
