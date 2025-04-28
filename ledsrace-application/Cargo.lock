@@ -708,6 +708,7 @@ dependencies = [
  "embassy-time",
  "heapless 0.8.0",
  "libm",
+ "once_cell",
 ]
 
 [[package]]

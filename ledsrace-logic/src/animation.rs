@@ -4,11 +4,31 @@ use libm::sinf;
 
 use crate::{Circuit, Color, Priority};
 
-pub mod advanced;
-pub mod basic;
+mod advanced;
+mod basic;
+mod circuit_pulse;
+mod dutch_flag;
+mod ghost_car;
+mod growing_trail;
+mod lightning_sprint;
+mod mexican_wave;
+mod overtake;
+mod party;
+mod raindrop;
+mod unicorn_rainbow;
 
-use advanced::*;
-use basic::*;
+pub use advanced::*;
+pub use basic::*;
+pub use circuit_pulse::*;
+pub use dutch_flag::*;
+pub use ghost_car::*;
+pub use growing_trail::*;
+pub use lightning_sprint::*;
+pub use mexican_wave::*;
+pub use overtake::*;
+pub use party::*;
+pub use raindrop::*;
+pub use unicorn_rainbow::*;
 
 /// Core trait for all animations
 pub trait Animation {
@@ -65,17 +85,21 @@ pub trait Animation {
 
 /// Manages a queue of animations and cycles through them
 pub struct AnimationQueue {
-    animations: HeaplessVec<&'static Animations, 8>, // Fixed max number of animations
+    animations: HeaplessVec<&'static Animations, 12>, // Fixed max number of animations
     current_index: usize,
+    /// Start time of the current animation
     start_time: Instant,
+    /// Maximum duration of an animation
+    max_duration: Duration,
 }
 
 impl AnimationQueue {
-    pub fn new() -> Self {
+    pub fn new(max_duration: Duration) -> Self {
         Self {
             animations: HeaplessVec::new(),
             current_index: 0,
             start_time: Instant::now(),
+            max_duration,
         }
     }
 
@@ -102,14 +126,20 @@ impl AnimationQueue {
 
         if let Some(animation) = self.animations.get(self.current_index) {
             // Auto-advance if current animation is finished
-            if animation.is_finished() {
+            if animation.is_finished() || self.start_time.elapsed() > self.max_duration {
                 self.next_animation();
                 // Get the new animation after advancing
                 if let Some(new_animation) = self.animations.get(self.current_index) {
-                    new_animation.render(circuit, current_time - self.start_time);
+                    new_animation.render(
+                        circuit,
+                        current_time.saturating_duration_since(self.start_time),
+                    );
                 }
             } else {
-                animation.render(circuit, current_time - self.start_time);
+                animation.render(
+                    circuit,
+                    current_time.saturating_duration_since(self.start_time),
+                );
             }
         }
     }
@@ -147,38 +177,76 @@ impl Animation for WaveAnimation {
     }
 }
 
+macro_rules! impl_animation_for_enum {
+    ($enum_name:ident, $($variant:ident),+) => {
+        impl Animation for $enum_name {
+            fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, timestamp: Duration) {
+                match self {
+                    $( $enum_name::$variant(animation) => animation.render(circuit, timestamp), )+
+                }
+            }
+
+            fn is_finished(&self) -> bool {
+                match self {
+                    $( $enum_name::$variant(animation) => animation.is_finished(), )+
+                }
+            }
+
+            fn priority(&self) -> Priority {
+                match self {
+                    $( $enum_name::$variant(animation) => animation.priority(), )+
+                }
+            }
+
+            fn reset(&self) {
+                match self {
+                    $( $enum_name::$variant(animation) => animation.reset(), )+
+                }
+            }
+        }
+    };
+}
+
 pub enum Animations {
     Sunset(SunsetGlow),
     Static(StaticColor),
     ShowSectors(ShowSectors),
     SectorFrames(SectorFrames),
+    RainDrop(RainDropRace),
+    Party(Party),
+    OvertakeDuel(OvertakeDuel),
+    GhostCar(GhostCar),
+    LightningSprint(LightningSprint),
+    MexicanWave(MexicanWave),
+    UnicornRainbow(UnicornRainbow),
+    DutchFlag(DutchFlag),
+    CircuitPulse(CircuitPulse),
+    GrowingTrail(GrowingTrail),
 }
 
-impl Animation for Animations {
-    fn render<const N: usize, C: Circuit<N>>(&self, circuit: &mut C, timestamp: Duration) {
-        match self {
-            Animations::Sunset(animation) => animation.render(circuit, timestamp),
-            Animations::Static(animation) => animation.render(circuit, timestamp),
-            Animations::ShowSectors(animation) => animation.render(circuit, timestamp),
-            Animations::SectorFrames(animation) => animation.render(circuit, timestamp),
-        }
-    }
+impl_animation_for_enum!(
+    Animations,
+    Sunset,
+    Static,
+    ShowSectors,
+    SectorFrames,
+    RainDrop,
+    Party,
+    OvertakeDuel,
+    GhostCar,
+    LightningSprint,
+    MexicanWave,
+    UnicornRainbow,
+    DutchFlag,
+    CircuitPulse,
+    GrowingTrail
+);
 
-    fn is_finished(&self) -> bool {
-        match self {
-            Animations::Sunset(animation) => animation.is_finished(),
-            Animations::Static(animation) => animation.is_finished(),
-            Animations::ShowSectors(animation) => animation.is_finished(),
-            Animations::SectorFrames(animation) => animation.is_finished(),
-        }
-    }
-
-    fn priority(&self) -> Priority {
-        match self {
-            Animations::Sunset(animation) => animation.priority(),
-            Animations::Static(animation) => animation.priority(),
-            Animations::ShowSectors(animation) => animation.priority(),
-            Animations::SectorFrames(animation) => animation.priority(),
-        }
-    }
+// Helper function to scale a Color by the given brightness factor (0.0 to 1.0).
+pub fn scale_color(color: Color, brightness: f32) -> Color {
+    // Assuming Color is defined as Color(u8, u8, u8)
+    let r = (color.0 as f32 * brightness).min(255.0) as u8;
+    let g = (color.1 as f32 * brightness).min(255.0) as u8;
+    let b = (color.2 as f32 * brightness).min(255.0) as u8;
+    Color(r, g, b)
 }

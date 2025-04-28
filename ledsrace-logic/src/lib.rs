@@ -39,6 +39,8 @@ pub trait Circuit<const N: usize> {
     /// Returns the positions of all LEDs on the circuit
     fn led_positions(&self) -> &'static [Point];
 
+    fn led_positions_random(&self) -> &'static [Point];
+
     /// Returns the positions of all LEDs in a specific sector
     fn sectors(&self, sector: Sector) -> &'static [Point];
 
