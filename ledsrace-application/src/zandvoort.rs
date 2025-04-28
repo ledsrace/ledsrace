@@ -1,4 +1,4 @@
-use ledsrace_logic::{Circuit, Color, LedStateBuffer, Point, Priority, Sector};
+use ledsrace_core::{Circuit, Color, LedStateBuffer, Point, Priority, Sector};
 
 /// LED positions in sorted order, following the physical layout of the circuit
 pub const LED_POSITIONS_SORTED: [Point; 216] = [

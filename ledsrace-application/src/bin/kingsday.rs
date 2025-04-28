@@ -24,7 +24,7 @@ use esp_hal::{
 };
 use heapless08::Vec;
 
-use ledsrace_logic::{animation::*, Circuit, Color};
+use ledsrace_core::{animation::*, Circuit, Color};
 use once_cell::sync::Lazy;
 use static_cell::StaticCell;
 

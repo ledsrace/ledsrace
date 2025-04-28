@@ -177,7 +177,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ledsrace-logic"
+name = "ledsrace-core"
 version = "0.1.0"
 dependencies = [
  "bincode",

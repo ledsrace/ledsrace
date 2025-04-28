@@ -30,7 +30,7 @@ riscv = "0.13.0"
 heapless08 = { package = "heapless", version = "0.8.0" }
 heapless07 = { package = "heapless", version = "0.7.0" }
 critical-section    = "1.1.3"
-ledsrace-logic = {path = "../ledsrace-logic"}
+ledsrace-core = {path = "../ledsrace-core"}
 nb = "1.1"
 once_cell = { version = "1.21.3", default-features = false, features = ["critical-section"] }
 
