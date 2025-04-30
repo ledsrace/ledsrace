@@ -39,6 +39,7 @@ pub trait Circuit<const N: usize> {
     /// Returns the positions of all LEDs on the circuit
     fn led_positions(&self) -> &'static [Point];
 
+    /// Returns the positions of all LEDs in a random order
     fn led_positions_random(&self) -> &'static [Point];
 
     /// Returns the positions of all LEDs in a specific sector
@@ -61,8 +62,6 @@ pub struct Color(pub u8, pub u8, pub u8);
 pub enum Priority {
     Background = 0,
     Normal = 1,
-    Warning = 2,
-    Critical = 3,
 }
 
 /// Represents a buffer of LED states that animations can write to
