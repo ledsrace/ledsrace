@@ -1,7 +1,5 @@
 # LEDSRACE firmware
 
-
-[![Kick](https://img.shields.io/badge/kick-53FC18?style=for-the-badge&logo=kick&logoColor=white)](https://www.kickstarter.com/projects/jitterdelft/ledsrace-interactive-led-art-of-zandvoort-circuit)
 [![Instagram](https://img.shields.io/badge/Instagram-%23E4405F.svg?style=for-the-badge&logo=Instagram&logoColor=white)](https://www.instagram.com/leds.race/)
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
 
@@ -44,13 +42,6 @@ You can use this repository as a starting point, or write it yourself from scrat
 - 1x temperature sensor for safety
 - Wifi (currently not implemented in firmware)
 - USB Connection (currently not implemented in firmware)
-
-## How to get one?
-
-![](https://i.kickstarter.com/tq0sfld-kickstarter-logo-green.png?fit=scale-down&origin=static&width=1000&sig=ixapsTNmmPEFl31G4w1YjZiCZpak4bUuMx5ZqHfEiG0%3D)
-
-[Back our project on Kickstarter](https://www.kickstarter.com/projects/jitterdelft/ledsrace-interactive-led-art-of-zandvoort-circuit) and get one or more LEDSRACE boards as a reward.
-
 
 ## How to load a new program?
 
