@@ -47,6 +47,29 @@ You can use this repository as a starting point, or write it yourself from scrat
 
 See [FLASH GUIDE BROWSER](docs/FLASH_GUIDE_BROWSER.md) for instructions.
 
+
+## Create bin file for distribution
+
+Binary file including bootloader and partition table (in case of bricked board)
+
+```bash
+espflash save-image --chip esp32c3 target/riscv32imc-unknown-none-elf/release/ledsrace firmware-ledsrace.bin --merge
+
+espflash save-image --chip esp32c3 target/riscv32imc-unknown-none-elf/release/kingsday firmware-kingsday.bin --merge
+
+## Flash this binary file at 0x0 address (since it includes bootloader and partition table)
+espflash write-bin 0x0 ./firmware-ledsrace.bin
+```
+
+Binary file including application only
+
+```bash
+espflash save-image --chip esp32c3 target/riscv32imc-unknown-none-elf/debug/f1-hardware firmware.bin
+
+## Flash this binary file at 0x10000 address
+espflash write-bin 0x10000 ./firmware.bin
+```
+
 ## License
 
 LEDSRACE firmware is licensed under the MIT license ([LICENSE](LICENSE) or http://opensource.org/licenses/MIT).
